@@ -260,16 +260,19 @@ exports.getCommentByIdPost = async (req, res) => {
         const postId = req.query.postId;
 
         // Find Specific Comment by Post Id and populate user and post
-        const comments = await Comment.find({ post_id: postId }).populate({
-            path: "user_id",
-            select: "username",
-        });
+        const comments = await Comment.find({ post_id: postId })
+            .populate({
+                path: "user_id",
+                select: "username",
+            })
+            .populate("user_id");
 
         const transformedComments = comments.map((comment) => {
             return {
                 _id: comment._id,
                 text: comment.text,
                 username: comment.user_id.username,
+                is_admin: comment.user_id.is_admin,
             };
         });
 
