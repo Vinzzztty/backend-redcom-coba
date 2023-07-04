@@ -1,38 +1,36 @@
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
-
-// Show the Homepage
-exports.homepage = async (req, res) => {
-    try {
-        const posts = await Post.find().populate("user");
-        const postsWithComments = await Promise.all(
-            posts.map(async (post) => {
-                const comments = await Comment.find({
-                    post: post._id,
-                }).populate("user");
-                return {
-                    _id: post._id,
-                    content: post.content,
-                    type: post.type,
-                    user: post.user,
-                    comments: comments,
-                };
-            })
-        );
-        res.status(200).json({ status: "success", postsWithComments });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occurred",
-        });
-    }
-};
+const Kategori = require("../models/Kategori");
+const User = require("../models/User");
 
 // Create new Post
 exports.createPost = async (req, res) => {
     try {
-        const { content, type, userId } = req.body;
-        const post = new Post({ content, type, user: userId });
+        const { content, kategoriId, userId } = req.body;
+
+        const userExists = await User.exists({ _id: userId });
+
+        if (!userExists) {
+            return res.status(404).json({
+                status: "error",
+                message: "User not found",
+            });
+        }
+
+        const kategoriExists = await Kategori.exists({ _id: kategoriId });
+
+        if (!kategoriExists) {
+            return res.status(404).json({
+                status: "error",
+                message: "Kategori not found",
+            });
+        }
+
+        const post = new Post({
+            content,
+            kategori_id: kategoriId,
+            user_id: userId,
+        });
         await post.save();
         res.status(201).json({
             status: "success",
@@ -69,7 +67,10 @@ exports.getSpecificPost = async (req, res, next) => {
         const postId = req.params.id;
 
         // Find Specific Post by Id
-        const post = await Post.findById(postId);
+        const post = await Post.findById(postId)
+            .populate("user_id")
+            .populate("kategori_id")
+            .exec();
 
         if (!post) {
             return res.status(404).json({
@@ -91,12 +92,12 @@ exports.getSpecificPost = async (req, res, next) => {
 exports.editPost = async (req, res) => {
     try {
         const postId = req.params.id;
-        const { content, type } = req.body;
+        const { content, kategoriId } = req.body;
 
         // Find the post by Id and Update the fields
         const updatedPost = await Post.findByIdAndUpdate(
             postId,
-            { content, type },
+            { content, kategori_id: kategoriId },
             { new: true }
         );
 
@@ -119,8 +120,6 @@ exports.deletePost = async (req, res) => {
 
         // Delete the post from the databse
         await Post.findByIdAndDelete(postId);
-
-        // await Post.deleteOne({ _id: req.params.id });
 
         res.status(200).json({
             status: "success",
