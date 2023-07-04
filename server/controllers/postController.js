@@ -3,6 +3,8 @@ const Comment = require("../models/Comment");
 const Kategori = require("../models/Kategori");
 const User = require("../models/User");
 
+const { formatDate, formatTime } = require("../utils/formattedDate");
+
 // Create new Post
 exports.createPost = async (req, res) => {
     try {
@@ -67,7 +69,7 @@ exports.getSpecificPost = async (req, res, next) => {
         const postId = req.params.id;
 
         // Find Specific Post by Id
-        const posts = await Post.findById(postId)
+        const posts = await Post.findOne({ _id: postId })
             .populate("user_id")
             .populate("kategori_id")
             .exec();
@@ -79,26 +81,29 @@ exports.getSpecificPost = async (req, res, next) => {
             });
         }
 
-        const formattedPosts = posts.map((post) => {
-            const formattedCreatedAtDate = formatDate(post.crdAt);
-            const formattedCreatedAtTime = formatTime(post.crdAt);
+        const formattedPosts = () => {
+            const date_created = formatDate(posts.crdAt);
+            const time = formatTime(posts.crdAt);
 
             return {
-                _id: post._id,
-                content: post.content,
-                kategori_id: post.kategori_id,
-                user_id: post.user_id,
-                date_created: formattedCreatedAtDate,
-                time: formattedCreatedAtTime,
+                _id: posts._id,
+                content: posts.content,
+                kategori_id: posts.kategori_id,
+                user_id: posts.user_id,
+                date_created: date_created,
+                time: time,
             };
-        });
+        };
 
         res.status(200).json({
             status: "success",
-            data: formattedPosts,
+            data: formattedPosts(),
         });
     } catch (error) {
-        next(error);
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
     }
 };
 
