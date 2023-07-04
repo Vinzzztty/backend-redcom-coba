@@ -67,21 +67,35 @@ exports.getSpecificPost = async (req, res, next) => {
         const postId = req.params.id;
 
         // Find Specific Post by Id
-        const post = await Post.findById(postId)
+        const posts = await Post.findById(postId)
             .populate("user_id")
             .populate("kategori_id")
             .exec();
 
-        if (!post) {
+        if (!posts) {
             return res.status(404).json({
                 status: "error",
                 message: "Post not found",
             });
         }
 
+        const formattedPosts = posts.map((post) => {
+            const formattedCreatedAtDate = formatDate(post.crdAt);
+            const formattedCreatedAtTime = formatTime(post.crdAt);
+
+            return {
+                _id: post._id,
+                content: post.content,
+                kategori_id: post.kategori_id,
+                user_id: post.user_id,
+                date_created: formattedCreatedAtDate,
+                time: formattedCreatedAtTime,
+            };
+        });
+
         res.status(200).json({
             status: "success",
-            data: post,
+            data: formattedPosts,
         });
     } catch (error) {
         next(error);
