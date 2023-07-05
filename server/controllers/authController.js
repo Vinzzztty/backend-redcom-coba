@@ -213,6 +213,22 @@ exports.editUser = async (req, res) => {
 
             const { username, email } = req.body;
 
+            const doesExistEmail = await User.findOne({ email: email });
+            if (doesExistEmail) {
+                return res.status(401).json({
+                    msg: `${email} is already been use`,
+                });
+            }
+
+            const doesExistsUsername = await User.findOne({
+                username: username,
+            });
+            if (doesExistsUsername) {
+                return res.status(401).json({
+                    msg: `${username} is already been use`,
+                });
+            }
+
             const updatedUser = await User.findByIdAndUpdate(
                 userId,
                 {
