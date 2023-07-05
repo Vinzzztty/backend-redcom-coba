@@ -1,6 +1,7 @@
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
 const Kategori = require("../models/Kategori");
+const Report = require("../models/Report");
 const User = require("../models/User");
 
 const { formatDate, formatTime } = require("../utils/formattedDate");
@@ -137,12 +138,18 @@ exports.deletePost = async (req, res) => {
     try {
         const postId = req.params.id;
 
-        // Delete the post from the databse
+        // Delete the post from the database
         await Post.findByIdAndDelete(postId);
+
+        // Delete the comments associated with the post
+        await Comment.deleteMany({ post_id: postId });
+
+        // Delete the reports associated with the post
+        await Report.deleteOne({ post_id: postId });
 
         res.status(200).json({
             status: "success",
-            message: "Post deleted successfully",
+            message: "Post and associated data deleted successfully",
         });
     } catch (error) {
         res.status(500).json({

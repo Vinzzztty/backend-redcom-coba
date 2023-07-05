@@ -1,4 +1,7 @@
 const User = require("../models/User");
+const Post = require("../models/Post");
+const Comment = require("../models/Comment");
+const Report = require("../models/Report");
 const bcryptjs = require("bcryptjs");
 
 exports.createUser = async (req, res) => {
@@ -131,9 +134,18 @@ exports.deleteUser = async (req, res) => {
         // Delete the user from the database
         await User.findByIdAndDelete(userId);
 
+        // Delete the user's posts
+        await Post.deleteMany({ user_id: userId });
+
+        // Delete the user's comments
+        await Comment.deleteMany({ user_id: userId });
+
+        // Delete the user's reports
+        await Report.deleteMany({ user_id: userId });
+
         res.status(200).json({
             status: "success",
-            message: "User deleted successfully",
+            message: "User and associated data deleted successfully",
         });
     } catch (error) {
         res.status(404).json({
