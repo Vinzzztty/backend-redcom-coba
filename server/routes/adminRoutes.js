@@ -8,6 +8,6 @@ router.get("/allPosts", adminControllers.getAllPosts);
 
 router.get("/getReports", adminControllers.getAllReports);
 
-router.delete("/delete:id", adminControllers.deletePost);
+router.delete("/delete/:id", adminControllers.deletePost);
 
 module.exports = router;
