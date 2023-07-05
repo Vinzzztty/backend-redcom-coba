@@ -39,6 +39,22 @@ exports.getAllPosts = async (req, res) => {
     }
 };
 
+exports.getAllReports = async (req, res) => {
+    try {
+        const reports = await Report.find();
+
+        res.status(200).json({
+            status: "success",
+            data: reports,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+};
+
 exports.deletePost = async (req, res) => {
     try {
         const postId = req.params.id;

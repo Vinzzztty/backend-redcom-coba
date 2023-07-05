@@ -4,7 +4,9 @@ const adminControllers = require("../controllers/adminController");
 
 router.get("/dashboard", adminControllers.getCountUserAndPost);
 
-router.get("/reportPosts", adminControllers.getAllPosts);
+router.get("/allPosts", adminControllers.getAllPosts);
+
+router.get("/getReports", adminControllers.getAllReports);
 
 router.delete("/delete:id", adminControllers.deletePost);
 
