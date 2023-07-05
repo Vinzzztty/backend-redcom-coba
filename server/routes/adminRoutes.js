@@ -6,4 +6,6 @@ router.get("/dashboard", adminControllers.getCountUserAndPost);
 
 router.get("/reportPosts", adminControllers.getAllPosts);
 
+router.delete("/delete:id", adminControllers.deletePost);
+
 module.exports = router;

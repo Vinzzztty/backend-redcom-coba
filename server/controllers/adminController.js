@@ -24,11 +24,30 @@ exports.getCountUserAndPost = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find();
+        const posts = await Post.find().select("_id");
 
         res.status(200).json({
             status: "success",
-            data: posts._id,
+            data: posts,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+};
+
+exports.deletePost = async (req, res) => {
+    try {
+        const postId = req.params.id;
+
+        // Delete the post from the databse
+        await Post.findByIdAndDelete(postId);
+
+        res.status(200).json({
+            status: "success",
+            message: "Post deleted successfully",
         });
     } catch (error) {
         res.status(500).json({
