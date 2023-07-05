@@ -21,3 +21,19 @@ exports.getCountUserAndPost = async (req, res) => {
         });
     }
 };
+
+exports.getAllPosts = async (req, res) => {
+    try {
+        const posts = await Post.find();
+
+        res.status(200).json({
+            status: "success",
+            data: posts._id,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+};
