@@ -193,6 +193,48 @@ exports.getUserPost = async (req, res) => {
     }
 };
 
+exports.editUser = async (req, res) => {
+    try {
+        verifyAccessToken(req, res, async (err) => {
+            if (err) {
+                return res.status(401).json({ error: "Unauthorized" });
+            }
+
+            const userId = req.payload.aud;
+
+            const user = await User.findOne({ _id: userId });
+
+            if (!user) {
+                return res.status(404).json({
+                    status: "error",
+                    message: "user not found",
+                });
+            }
+
+            const { username, email } = req.body;
+
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                {
+                    username,
+                    email,
+                },
+                { new: true }
+            );
+
+            res.status(200).json({
+                status: "success",
+                data: updatedUser,
+            });
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occurred",
+        });
+    }
+};
+
 exports.logout = async (req, res) => {
     try {
         logoutUser(req, res);
