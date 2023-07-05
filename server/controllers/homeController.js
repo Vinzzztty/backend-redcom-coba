@@ -287,19 +287,3 @@ exports.getCommentByIdPost = async (req, res) => {
         });
     }
 };
-
-exports.getCountUser = async (req, res) => {
-    try {
-        const count = await User.countDocuments({ is_admin: { $ne: 1 } });
-
-        res.status(200).json({
-            status: "success",
-            count,
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "An unexpected error occurred",
-        });
-    }
-};
