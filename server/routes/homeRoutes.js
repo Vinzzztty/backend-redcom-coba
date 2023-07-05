@@ -16,6 +16,4 @@ router.post("/new-comment", homeController.createComment);
 
 router.get("/comments", homeController.getCommentByIdPost);
 
-router.get("/count-user", homeController.getCountUser);
-
 module.exports = router;

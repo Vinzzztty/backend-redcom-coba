@@ -18,13 +18,6 @@ const port = 5000 || process.env.PORT;
 // CORS configuration
 app.set("trust proxy", 1);
 app.use(cors());
-// app.use(
-//     cors({
-//         origin: "*",
-//         methods: ["GET", "POST", "PUT", "DELETE"],
-//         credentials: true,
-//     })
-// );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -48,12 +41,12 @@ app.get("/", (req, res) => {
     });
 });
 
-// Handle 404
-// app.get("*", (req, res) => {
-//     res.status(404).json({
-//         message: "Not Found",
-//     });
-// });
+//Handle 404
+app.get("*", (req, res) => {
+    res.status(404).json({
+        message: "Not Found",
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
