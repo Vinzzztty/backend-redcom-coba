@@ -15,10 +15,17 @@ exports.signup = async (req, res) => {
     try {
         const { username, email, password, is_admin } = req.body;
 
-        const doesExist = await User.findOne({ email: email });
-        if (doesExist) {
+        const doesExistEmail = await User.findOne({ email: email });
+        if (doesExistEmail) {
             return res.status(401).json({
                 msg: `${email} is already been registered`,
+            });
+        }
+
+        const doesExistUsername = await User.findOne({ username: username });
+        if (doesExistUsername) {
+            return res.status(401).json({
+                msg: `${username} is already been registered`,
             });
         }
 
