@@ -1,5 +1,6 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const Report = require("../models/Report");
 const Kategori = require("../models/Kategori");
 const Comment = require("../models/Comment");
 const { verifyAccessToken } = require("../middleware/jwt_helper");
@@ -44,6 +45,8 @@ exports.deletePost = async (req, res) => {
 
         // Delete the post from the databse
         await Post.findByIdAndDelete(postId);
+
+        await Report.deleteOne({ post_id: postId });
 
         res.status(200).json({
             status: "success",

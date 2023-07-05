@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Post = require("../models/Post");
+const Report = require("../models/Report");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {
@@ -254,6 +255,61 @@ exports.editUser = async (req, res) => {
         res.status(500).json({
             status: "error",
             message: "An unexpected error occurred",
+        });
+    }
+};
+
+exports.reportPost = async (req, res) => {
+    try {
+        verifyAccessToken(req, res, async (err) => {
+            if (err) {
+                return res.status(401).json({
+                    error: "Unauthorized",
+                });
+            }
+
+            const userId = req.payload.aud;
+            const postId = req.params.id;
+
+            const user = await User.findOne({ _id: userId });
+
+            if (!user) {
+                return res.status(404).json({
+                    status: "error",
+                    message: "user not found",
+                });
+            }
+
+            const existingReport = await Report.findOne({
+                post_id: postId,
+                user_id: userId,
+            });
+
+            if (existingReport) {
+                return res.status(409).json({
+                    status: "error",
+                    message: "You have already reported this post",
+                });
+            }
+
+            const report = new Report({
+                post_id: postId,
+                user_id: userId,
+                reason: req.body.reason, // Assuming the user provides a reason for reporting the post in the request body
+            });
+
+            await report.save();
+
+            res.status(201).json({
+                status: "success",
+                message: "Post reported successfully",
+            });
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occurred",
+            error: error.message,
         });
     }
 };
