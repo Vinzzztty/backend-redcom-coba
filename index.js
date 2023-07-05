@@ -10,6 +10,7 @@ const commentRoutes = require("./server/routes/commentRoutes");
 const homeRoutes = require("./server/routes/homeRoutes");
 const kategoriRoutes = require("./server/routes/kategoriRoute");
 const authRoutes = require("./server/routes/authRoute");
+const adminRoutes = require("./server/routes/adminRoutes");
 
 const app = express();
 const port = 5000 || process.env.PORT;
@@ -38,6 +39,8 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/kategori", kategoriRoutes);
 app.use("/api/auth", authRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
     res.status(200).json({
