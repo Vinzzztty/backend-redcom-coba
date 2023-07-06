@@ -8,7 +8,6 @@ const reportSchema = new mongoose.Schema(
         },
         reason: {
             type: String,
-            enum: ["Tidak Senonoh", "Ujaran Kebencian"],
             required: true,
         },
         user_id: {
