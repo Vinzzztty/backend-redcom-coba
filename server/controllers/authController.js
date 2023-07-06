@@ -184,12 +184,17 @@ exports.getUserPost = async (req, res) => {
                         user_id: userId,
                     });
 
+                    const totalCommentsByPost = await Comment.countDocuments({
+                        post_id: post._id,
+                    });
+
                     return {
                         _id: post._id,
                         content: post.content,
                         kategori_id: post.kategori_id,
                         user_id: post.user_id,
-                        total_comments: totalComments,
+                        total_comments: totalCommentsByPost,
+                        user_total_comments: totalComments,
                         date_created: formattedCreatedAtDate,
                         time: formattedCreatedAtTime,
                     };
