@@ -221,35 +221,52 @@ exports.editUser = async (req, res) => {
 
             const { username, email } = req.body;
 
-            const doesExistEmail = await User.findOne({ email: email });
-            if (doesExistEmail) {
-                return res.status(401).json({
-                    msg: `${email} is already been use`,
+            if (email === user.email && username === user.username) {
+                // Email and username remains the same, no need validation
+                const updatedUser = await User.findByIdAndUpdate(
+                    userId,
+                    {
+                        username,
+                        email,
+                    },
+                    { new: true }
+                );
+
+                return res.status(200).json({
+                    status: "success",
+                    data: updatedUser,
+                });
+            } else {
+                const doesExistEmail = await User.findOne({ email: email });
+                if (doesExistEmail) {
+                    return res.status(401).json({
+                        msg: `${email} is already been use`,
+                    });
+                }
+
+                const doesExistsUsername = await User.findOne({
+                    username: username,
+                });
+                if (doesExistsUsername) {
+                    return res.status(401).json({
+                        msg: `${username} is already been use`,
+                    });
+                }
+
+                const updatedUser = await User.findByIdAndUpdate(
+                    userId,
+                    {
+                        username,
+                        email,
+                    },
+                    { new: true }
+                );
+
+                return res.status(200).json({
+                    status: "success",
+                    data: updatedUser,
                 });
             }
-
-            const doesExistsUsername = await User.findOne({
-                username: username,
-            });
-            if (doesExistsUsername) {
-                return res.status(401).json({
-                    msg: `${username} is already been use`,
-                });
-            }
-
-            const updatedUser = await User.findByIdAndUpdate(
-                userId,
-                {
-                    username,
-                    email,
-                },
-                { new: true }
-            );
-
-            res.status(200).json({
-                status: "success",
-                data: updatedUser,
-            });
         });
     } catch (error) {
         res.status(500).json({
