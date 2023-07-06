@@ -10,7 +10,7 @@ const formatDate = (dateString) => {
 // Format the time as "HH:mm" (e.g., 13:25)
 const formatTime = (dateString) => {
     const date = new Date(Date.parse(dateString));
-    return date.toLocaleTimeString("en-US", {
+    return date.toLocaleTimeString("id-ID", {
         hour: "2-digit",
         minute: "2-digit",
     });
