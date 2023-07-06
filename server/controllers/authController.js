@@ -221,8 +221,53 @@ exports.editUser = async (req, res) => {
 
             const { username, email } = req.body;
 
-            if (email === user.email && username === user.username) {
-                // Email and username remains the same, no need validation
+            if (email === user.email) {
+                if (username === user.username) {
+                    // Email and username remains the same, no need validation
+                    const updatedUser = await User.findByIdAndUpdate(
+                        userId,
+                        {
+                            username,
+                            email,
+                        },
+                        { new: true }
+                    );
+
+                    return res.status(200).json({
+                        status: "success",
+                        data: updatedUser,
+                    });
+                } else {
+                    const updatedUser = await User.findByIdAndUpdate(
+                        userId,
+                        {
+                            username,
+                            email,
+                        },
+                        { new: true }
+                    );
+
+                    return res.status(200).json({
+                        status: "success",
+                        data: updatedUser,
+                    });
+                }
+            } else if (username === user.username) {
+                if (email === user.email) {
+                    const updatedUser = await User.findByIdAndUpdate(
+                        userId,
+                        {
+                            username,
+                            email,
+                        },
+                        { new: true }
+                    );
+
+                    return res.status(200).json({
+                        status: "success",
+                        data: updatedUser,
+                    });
+                }
                 const updatedUser = await User.findByIdAndUpdate(
                     userId,
                     {
