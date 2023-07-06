@@ -224,6 +224,15 @@ exports.editUser = async (req, res) => {
             if (email === user.email) {
                 if (username === user.username) {
                     // Email and username remains the same, no need validation
+                    const doesExistsUsername = await User.findOne({
+                        username: username,
+                    });
+                    if (doesExistsUsername) {
+                        return res.status(401).json({
+                            msg: `${username} is already been use`,
+                        });
+                    }
+
                     const updatedUser = await User.findByIdAndUpdate(
                         userId,
                         {
@@ -253,6 +262,12 @@ exports.editUser = async (req, res) => {
                     });
                 }
             } else if (username === user.username) {
+                const doesExistEmail = await User.findOne({ email: email });
+                if (doesExistEmail) {
+                    return res.status(401).json({
+                        msg: `${email} is already been use`,
+                    });
+                }
                 if (email === user.email) {
                     const updatedUser = await User.findByIdAndUpdate(
                         userId,
