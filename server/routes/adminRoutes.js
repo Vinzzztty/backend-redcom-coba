@@ -10,6 +10,6 @@ router.get("/getReports", adminControllers.getAllReports);
 
 router.delete("/delete/:id", adminControllers.deletePost);
 
-router.delete("report/delete/:id", adminControllers.deleteReport);
+router.delete("/report/delete/:id", adminControllers.deleteReport);
 
 module.exports = router;
