@@ -41,7 +41,10 @@ exports.getAllPosts = async (req, res) => {
 
 exports.getAllReports = async (req, res) => {
     try {
-        const reports = await Report.find();
+        const reports = await Report.find()
+            .populate("user_id")
+            .populate("post_id")
+            .sort({ crdAt: -1 });
 
         res.status(200).json({
             status: "success",
