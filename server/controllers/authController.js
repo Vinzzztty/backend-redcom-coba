@@ -222,7 +222,6 @@ exports.editUser = async (req, res) => {
             const { username, email } = req.body;
 
             // cek email
-
             if (email === user.email) {
                 if (username === user.username) {
                     // Email and username remains the same, no need validation
@@ -248,7 +247,38 @@ exports.editUser = async (req, res) => {
                         status: "success",
                         data: updatedUser,
                     });
-                } else {
+                }
+                const doesExistsUsername = await User.findOne({
+                    username: username,
+                });
+                if (doesExistsUsername) {
+                    return res.status(401).json({
+                        msg: `${username} is already been use`,
+                    });
+                }
+                const updatedUser = await User.findByIdAndUpdate(
+                    userId,
+                    {
+                        username,
+                        email,
+                    },
+                    { new: true }
+                );
+
+                return res.status(200).json({
+                    status: "success",
+                    data: updatedUser,
+                });
+            }
+
+            if (username === user.username) {
+                if (email === user.email) {
+                    const doesExistEmail = await User.findOne({ email: email });
+                    if (doesExistEmail) {
+                        return res.status(401).json({
+                            msg: `${email} is already been use`,
+                        });
+                    }
                     const updatedUser = await User.findByIdAndUpdate(
                         userId,
                         {
@@ -261,15 +291,6 @@ exports.editUser = async (req, res) => {
                     return res.status(200).json({
                         status: "success",
                         data: updatedUser,
-                    });
-                }
-            }
-
-            if (username === user.username) {
-                const doesExistEmail = await User.findOne({ email: email });
-                if (doesExistEmail) {
-                    return res.status(401).json({
-                        msg: `${email} is already been use`,
                     });
                 }
 
@@ -279,21 +300,6 @@ exports.editUser = async (req, res) => {
                 if (doesExistsUsername) {
                     return res.status(401).json({
                         msg: `${username} is already been use`,
-                    });
-                }
-                if (email === user.email) {
-                    const updatedUser = await User.findByIdAndUpdate(
-                        userId,
-                        {
-                            username,
-                            email,
-                        },
-                        { new: true }
-                    );
-
-                    return res.status(200).json({
-                        status: "success",
-                        data: updatedUser,
                     });
                 }
                 const updatedUser = await User.findByIdAndUpdate(
