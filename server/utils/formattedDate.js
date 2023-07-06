@@ -1,6 +1,6 @@
 const formatDate = (dateString) => {
     const date = new Date(Date.parse(dateString));
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("id-ID", {
         day: "numeric",
         month: "long",
         year: "numeric",
