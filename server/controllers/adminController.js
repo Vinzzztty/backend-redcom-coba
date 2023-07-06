@@ -77,3 +77,21 @@ exports.deletePost = async (req, res) => {
         });
     }
 };
+
+exports.deleteReport = async (req, res) => {
+    try {
+        const reportId = req.params.id;
+
+        await Report.findByIdAndDelete(reportId);
+
+        res.status(200).json({
+            status: "success",
+            message: "Report deleted successfully",
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+};
