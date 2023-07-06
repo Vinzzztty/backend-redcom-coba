@@ -19,19 +19,27 @@ exports.home = async (req, res) => {
             });
         }
 
-        const formattedPosts = posts.map((post) => {
-            const formattedCreatedAtDate = formatDate(post.crdAt);
-            const formattedCreatedAtTime = formatTime(post.crdAt);
+        const formattedPosts = await Promise.all(
+            posts.map(async (post) => {
+                const formattedCreatedAtDate = formatDate(post.crdAt);
+                const formattedCreatedAtTime = formatTime(post.crdAt);
 
-            return {
-                _id: post._id,
-                content: post.content,
-                kategori_id: post.kategori_id,
-                user_id: post.user_id,
-                date_created: formattedCreatedAtDate,
-                time: formattedCreatedAtTime,
-            };
-        });
+                // Count the total comments for each post
+                const totalComments = await Comment.countDocuments({
+                    post_id: post._id,
+                });
+
+                return {
+                    _id: post._id,
+                    content: post.content,
+                    kategori_id: post.kategori_id,
+                    user_id: post.user_id,
+                    total_comments: totalComments,
+                    date_created: formattedCreatedAtDate,
+                    time: formattedCreatedAtTime,
+                };
+            })
+        );
 
         res.status(200).json({
             status: "success",
@@ -82,19 +90,27 @@ exports.search = async (req, res) => {
             });
         }
 
-        const formattedPosts = posts.map((post) => {
-            const formattedCreatedAtDate = formatDate(post.crdAt);
-            const formattedCreatedAtTime = formatTime(post.crdAt);
+        const formattedPosts = await Promise.all(
+            posts.map(async (post) => {
+                const formattedCreatedAtDate = formatDate(post.crdAt);
+                const formattedCreatedAtTime = formatTime(post.crdAt);
 
-            return {
-                _id: post._id,
-                content: post.content,
-                kategori_id: post.kategori_id,
-                user_id: post.user_id,
-                date_created: formattedCreatedAtDate,
-                time: formattedCreatedAtTime,
-            };
-        });
+                // Count the total comments for each post
+                const totalComments = await Comment.countDocuments({
+                    post_id: post._id,
+                });
+
+                return {
+                    _id: post._id,
+                    content: post.content,
+                    kategori_id: post.kategori_id,
+                    user_id: post.user_id,
+                    total_comments: totalComments,
+                    date_created: formattedCreatedAtDate,
+                    time: formattedCreatedAtTime,
+                };
+            })
+        );
 
         // res.render("search", { post });
         res.status(200).json({
@@ -228,19 +244,27 @@ exports.sortByKategori = async (req, res) => {
             });
         }
 
-        const formattedPosts = posts.map((post) => {
-            const formattedCreatedAtDate = formatDate(post.crdAt);
-            const formattedCreatedAtTime = formatTime(post.crdAt);
+        const formattedPosts = await Promise.all(
+            posts.map(async (post) => {
+                const formattedCreatedAtDate = formatDate(post.crdAt);
+                const formattedCreatedAtTime = formatTime(post.crdAt);
 
-            return {
-                _id: post._id,
-                content: post.content,
-                kategori_id: post.kategori_id,
-                user_id: post.user_id,
-                date_created: formattedCreatedAtDate,
-                time: formattedCreatedAtTime,
-            };
-        });
+                // Count total comments for each post
+                const totalComments = await Comment.countDocuments({
+                    post_id: post._id,
+                });
+
+                return {
+                    _id: post._id,
+                    content: post.content,
+                    kategori_id: post.kategori_id,
+                    user_id: post.user_id,
+                    total_comments: totalComments,
+                    date_created: formattedCreatedAtDate,
+                    time: formattedCreatedAtTime,
+                };
+            })
+        );
 
         // Return the sorted posts as the response
         res.status(200).json({
