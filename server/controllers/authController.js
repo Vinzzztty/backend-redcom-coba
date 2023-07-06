@@ -179,25 +179,23 @@ exports.getUserPost = async (req, res) => {
                 user_id: userId,
             });
 
-            const formattedPosts = await Promise.all(
-                posts.map(async (post) => {
-                    const formattedCreatedAtDate = formatDate(post.crdAt);
-                    const formattedCreatedAtTime = formatTime(post.crdAt);
+            const formattedPosts = posts.map(async (post) => {
+                const formattedCreatedAtDate = formatDate(post.crdAt);
+                const formattedCreatedAtTime = formatTime(post.crdAt);
 
-                    return {
-                        _id: post._id,
-                        content: post.content,
-                        kategori_id: post.kategori_id,
-                        user_id: post.user_id,
-                        date_created: formattedCreatedAtDate,
-                        time: formattedCreatedAtTime,
-                    };
-                })
-            );
-
+                return {
+                    _id: post._id,
+                    content: post.content,
+                    kategori_id: post.kategori_id,
+                    user_id: post.user_id,
+                    total_comments: totalComments,
+                    date_created: formattedCreatedAtDate,
+                    time: formattedCreatedAtTime,
+                };
+            });
             res.status(200).json({
                 status: "success",
-                data: { formattedPosts, totalComments },
+                data: formattedPosts,
             });
         });
     } catch (error) {
