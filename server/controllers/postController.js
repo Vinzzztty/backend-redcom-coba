@@ -29,12 +29,40 @@ exports.createPost = async (req, res) => {
             });
         }
 
+        // Update! sentiment analysis
+        // Sentiment analysis with Flask API
+        let sentimentLabel;
+        try {
+            const response = await axios.post(
+                "http://192.168.1.11:8080/api/predict",
+                {
+                    content: content,
+                }
+            );
+
+            if (response.status !== 200) {
+                throw new Error("Failed to analyze sentiment");
+            }
+
+            sentimentLabel = response.data.data.label; // Extract the label from the response
+        } catch (apiError) {
+            return res.status(500).json({
+                status: "error",
+                message: "Failed to analyze sentiment",
+            });
+        }
+
+        // Determine is_sensitive based on sentiment label
+        const isSensitive = sentimentLabel === "negative";
+
+        console.log(sentimentLabel);
+
         const post = new Post({
             content,
             kategori_id: kategoriId,
             user_id: userId,
         });
-        await post.save();
+        // await post.save();
         res.status(201).json({
             status: "success",
             message: post,

@@ -15,6 +15,10 @@ const commentSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post",
         },
+        is_sensitive: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: {
