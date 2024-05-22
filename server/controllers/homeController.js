@@ -322,6 +322,7 @@ exports.getCommentByIdPost = async (req, res) => {
                 text: comment.text,
                 username: comment.user_id.username,
                 is_admin: comment.user_id.is_admin,
+                is_sensitive: comment.is_sensitive,
             };
         });
 
