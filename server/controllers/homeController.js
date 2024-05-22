@@ -4,6 +4,7 @@ const Kategori = require("../models/Kategori");
 const Comment = require("../models/Comment");
 const { verifyAccessToken } = require("../middleware/jwt_helper");
 const { formatDate, formatTime } = require("../utils/formattedDate");
+const axios = require("axios");
 
 exports.home = async (req, res) => {
     try {
@@ -191,10 +192,34 @@ exports.createComment = async (req, res) => {
                     message: "user not found",
                 });
             }
+
+            // Sentiment analysis with Flask API
+            let sentimentLabel;
+            try {
+                const response = await axios.post(process.env.PREDICT_API, {
+                    text: text,
+                });
+
+                if (response.status !== 200) {
+                    throw new Error("Failed to analyze sentiment");
+                }
+
+                sentimentLabel = response.data.data.label; // Extract the label from the response
+            } catch (apiError) {
+                return res.status(500).json({
+                    status: "error",
+                    message: "Failed to analyze sentiment",
+                });
+            }
+
+            // Determine is_sensitive based on sentiment label
+            const isSensitive = sentimentLabel === "negative";
+
             const comment = new Comment({
                 text,
                 post_id: postId,
                 user_id: userId,
+                is_sensitive: isSensitive,
             });
             await comment.save();
 
