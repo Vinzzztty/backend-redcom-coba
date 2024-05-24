@@ -2,9 +2,11 @@ const Post = require("../models/Post");
 const User = require("../models/User");
 const Kategori = require("../models/Kategori");
 const Comment = require("../models/Comment");
+const AiAnswer = require("../models/AiAnswer");
 const { verifyAccessToken } = require("../middleware/jwt_helper");
 const { formatDate, formatTime } = require("../utils/formattedDate");
 const axios = require("axios");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.home = async (req, res) => {
     try {
@@ -334,6 +336,99 @@ exports.getCommentByIdPost = async (req, res) => {
         res.status(404).json({
             status: "error",
             message: "Comment id not found" || error.message,
+        });
+    }
+};
+
+exports.postAiCommentByIdPost = async (req, res) => {
+    try {
+        // Get Detail POST
+        const postId = req.params.id;
+
+        const posts = await Post.findOne({ _id: postId })
+            .populate("user_id")
+            .populate("kategori_id")
+            .exec();
+
+        if (!posts) {
+            return res.status(404).json({
+                status: "error",
+                message: "Post not found",
+            });
+        }
+
+        // Make comment using generate Gemini
+        const googleAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const geminiConfig = {
+            temperature: 0,
+            topP: 1,
+            topK: 1,
+            maxOutputTokens: 500,
+        };
+
+        const geminiModel = googleAI.getGenerativeModel({
+            model: "gemini-pro",
+            geminiConfig,
+        });
+
+        const generateText = async () => {
+            try {
+                const prompt = `${posts.content} answer with maximum 100 word`;
+                const result = await geminiModel.generateContent(prompt);
+
+                let response =
+                    result.response.candidates[0].content.parts[0].text;
+
+                // Remove unwanted formatting and join lines using regex
+                response = response
+                    .replace(/(\*\*|\*|_|\n)/g, " ")
+                    .replace(/\s+/g, " ")
+                    .trim();
+                return response;
+            } catch (error) {
+                throw new Error("Can't generate gemini: " + error.message);
+            }
+        };
+
+        const ai_answer = await generateText();
+
+        const formattedReturn = {
+            _id: posts._id,
+            content: posts.content,
+            ai_answer: ai_answer,
+        };
+
+        const aiAnswer = new AiAnswer({
+            post_id: postId,
+            ai_answer: ai_answer,
+        });
+
+        await aiAnswer.save();
+
+        res.status(200).json({
+            status: "success",
+            data: formattedReturn,
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: "error",
+            message: error.message,
+        });
+    }
+};
+
+exports.getAllAiAnswer = async (req, res) => {
+    try {
+        const aiAnswer = await AiAnswer.find().populate("post_id");
+
+        res.status(200).json({
+            status: "success",
+            data: aiAnswer,
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: "error",
+            message: error.message,
         });
     }
 };
