@@ -340,83 +340,6 @@ exports.getCommentByIdPost = async (req, res) => {
     }
 };
 
-exports.postAiCommentByIdPost = async (req, res) => {
-    try {
-        // Get Detail POST
-        const postId = req.params.id;
-
-        const posts = await Post.findOne({ _id: postId })
-            .populate("user_id")
-            .populate("kategori_id")
-            .exec();
-
-        if (!posts) {
-            return res.status(404).json({
-                status: "error",
-                message: "Post not found",
-            });
-        }
-
-        // Make comment using generate Gemini
-        const googleAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const geminiConfig = {
-            temperature: 0,
-            topP: 1,
-            topK: 1,
-            maxOutputTokens: 500,
-        };
-
-        const geminiModel = googleAI.getGenerativeModel({
-            model: "gemini-pro",
-            geminiConfig,
-        });
-
-        const generateText = async () => {
-            try {
-                const prompt = `${posts.content} answer with maximum 100 word`;
-                const result = await geminiModel.generateContent(prompt);
-
-                let response =
-                    result.response.candidates[0].content.parts[0].text;
-
-                // Remove unwanted formatting and join lines using regex
-                response = response
-                    .replace(/(\*\*|\*|_|\n)/g, " ")
-                    .replace(/\s+/g, " ")
-                    .trim();
-                return response;
-            } catch (error) {
-                throw new Error("Can't generate gemini: " + error.message);
-            }
-        };
-
-        const ai_answer = await generateText();
-
-        const formattedReturn = {
-            _id: posts._id,
-            content: posts.content,
-            ai_answer: ai_answer,
-        };
-
-        const aiAnswer = new AiAnswer({
-            post_id: postId,
-            ai_answer: ai_answer,
-        });
-
-        await aiAnswer.save();
-
-        res.status(200).json({
-            status: "success",
-            data: formattedReturn,
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: "error",
-            message: error.message,
-        });
-    }
-};
-
 exports.getAllAiAnswer = async (req, res) => {
     try {
         const aiAnswer = await AiAnswer.find().populate("post_id");
@@ -429,6 +352,129 @@ exports.getAllAiAnswer = async (req, res) => {
         res.status(404).json({
             status: "error",
             message: error.message,
+        });
+    }
+};
+
+exports.generateAiAnswer = async (req, res) => {
+    try {
+        verifyAccessToken(req, res, async (err) => {
+            if (err) {
+                return res.status(401).json({ error: "Unauthorized" });
+            }
+
+            const { postId } = req.body;
+
+            const posts = await Post.findOne({ _id: postId })
+                .populate("user_id")
+                .populate("kategori_id")
+                .exec();
+
+            if (!posts) {
+                return res.status(404).json({
+                    status: "error",
+                    message: "Post not found",
+                });
+            }
+
+            // Make comment using generate Gemini
+            const googleAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const geminiConfig = {
+                temperature: 0,
+                topP: 1,
+                topK: 1,
+                maxOutputTokens: 500,
+            };
+
+            const geminiModel = googleAI.getGenerativeModel({
+                model: "gemini-pro",
+                geminiConfig,
+            });
+
+            const generateText = async () => {
+                try {
+                    const prompt = `${posts.content} answer with maximum 100 word`;
+                    const result = await geminiModel.generateContent(prompt);
+
+                    let response =
+                        result.response.candidates[0].content.parts[0].text;
+
+                    // Remove unwanted formatting and join lines using regex
+                    response = response
+                        .replace(/(\*\*|\*|_|\n)/g, " ")
+                        .replace(/\s+/g, " ")
+                        .trim();
+                    return response;
+                } catch (error) {
+                    throw new Error("Can't generate gemini: " + error.message);
+                }
+            };
+
+            const ai_answer = await generateText();
+
+            const formattedReturn = {
+                post_id: posts._id,
+                content: posts.content,
+                ai_answer: ai_answer,
+            };
+
+            const aiAnswer = new AiAnswer({
+                post_id: postId,
+                ai_answer: ai_answer,
+            });
+
+            await aiAnswer.save();
+
+            res.status(200).json({
+                status: "success",
+                data: formattedReturn,
+            });
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "An unexpected error occurred" || error.message,
+        });
+    }
+};
+
+exports.getSpecificAiAnswer = async (req, res) => {
+    try {
+        const aiAnswerid = req.params.id;
+
+        const aiAnswer = await AiAnswer.findOne({ _id: aiAnswerid })
+            .populate("post_id")
+            .exec();
+
+        if (!aiAnswer) {
+            return res.status(404).json({
+                status: "error",
+                message: "Ai Answer not found",
+            });
+        }
+
+        const formattedAiAnswer = () => {
+            const date_created = formatDate(aiAnswer.crdAt);
+            const time = formatTime(aiAnswer.crdAt);
+
+            return {
+                _id: aiAnswer._id,
+                post_id: aiAnswer.post_id._id,
+                content: aiAnswer.post_id.content,
+                ai_answer: aiAnswer.ai_answer,
+                date_created: date_created,
+                time: time,
+            };
+        };
+
+        res.status(200).json({
+            status: "success",
+            data: formattedAiAnswer(),
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: "error",
+            message: "Comment id not found" || error.message,
         });
     }
 };

@@ -16,8 +16,10 @@ router.post("/new-comment", homeController.createComment);
 
 router.get("/comments", homeController.getCommentByIdPost);
 
-router.get("/answer-ai/:id", homeController.postAiCommentByIdPost);
+router.post("/answer-ai", homeController.generateAiAnswer);
 
 router.get("/answer-ai", homeController.getAllAiAnswer);
+
+router.get("/answer-ai/:id", homeController.getSpecificAiAnswer);
 
 module.exports = router;

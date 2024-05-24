@@ -3,6 +3,7 @@ const Comment = require("../models/Comment");
 const Kategori = require("../models/Kategori");
 const Report = require("../models/Report");
 const User = require("../models/User");
+const AiAnswer = require("../models/AiAnswer");
 
 const { formatDate, formatTime } = require("../utils/formattedDate");
 
@@ -82,23 +83,26 @@ exports.getSpecificPost = async (req, res, next) => {
             });
         }
 
-        const formattedPosts = () => {
-            const date_created = formatDate(posts.crdAt);
-            const time = formatTime(posts.crdAt);
+        // Find Ai Answer generate
+        // const aiAnswer = await AiAnswer.findOne({ post_id: postId });
 
-            return {
-                _id: posts._id,
-                content: posts.content,
-                kategori_id: posts.kategori_id,
-                user_id: posts.user_id,
-                date_created: date_created,
-                time: time,
-            };
+        // Find AI Answer associated with the post
+        const aiAnswer = await AiAnswer.findOne({ post_id: postId });
+
+        // Format the post data
+        const formattedPost = {
+            _id: posts._id,
+            content: posts.content,
+            kategori_id: posts.kategori_id,
+            user_id: posts.user_id,
+            ai_answer: aiAnswer ? aiAnswer.ai_answer : null,
+            date_created: formatDate(posts.crdAt),
+            time: formatTime(posts.crdAt),
         };
 
         res.status(200).json({
             status: "success",
-            data: formattedPosts(),
+            data: formattedPost,
         });
     } catch (error) {
         res.status(500).json({
